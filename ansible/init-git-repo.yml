@@ -1,0 +1,97 @@
+---
+- name: Crear Repositorio en GitHub e Integrar con AAP
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    # ------------- CONFIGURACIÓN DEL USUARIO -------------
+    # Cambia estos valores según tus necesidades.
+    github_user: "lboubeta"
+    source_repo_url: "https://github.com/ansible/ansible-tower-samples.git"
+    new_repo_name: "cac-test-repo"
+    new_repo_description: "Repositorio creado y sincronizado por Ansible para AAP."
+
+    # ------------- CONFIGURACIÓN DE AAP -------------
+    controller_host: "https://aap25-lboubeta-selfservice.apps.ocp.sa-iberia.lab.eng.brq2.redhat.com"
+    controller_validate_certs: false
+    aap_organization: "Default"
+    aap_inventory_name: "Demo Inventory" # Asegúrate de que este inventario exista en tu AAP.
+    aap_playbook_name: "hello_world.yml" # El playbook a ejecutar desde el repositorio clonado.
+    # ----------------------------------------------------
+
+    # --- Variables generadas (no es necesario cambiarlas) ---
+    local_clone_path: "/tmp/ansible_clone_{{ new_repo_name }}"
+    aap_project_name: "Proyecto CasC - {{ new_repo_name }}"
+    aap_job_template_name: "JT CasC - {{ new_repo_name }}"
+    aap_scm_credential_name: "Credencial Git - {{ new_repo_name }}"
+
+  vars_prompt:
+    - name: github_token
+      prompt: "Introduce tu Token de Acceso Personal de GitHub (con permisos de 'repo')"
+      private: true
+    - name: controller_username
+      prompt: "Introduce tu nombre de usuario de AAP Controller"
+      private: false
+    - name: controller_password
+      prompt: "Introduce tu contraseña o token de AAP Controller"
+      private: true
+
+  tasks:
+    - name: "Paso 1: Crear un nuevo repositorio privado en GitHub"
+      community.general.github_repo:
+        access_token: "{{ github_token }}"
+        name: "{{ new_repo_name }}"
+        description: "{{ new_repo_description }}"
+        private: true
+        state: present
+
+    - name: "Paso 2: Asegurar que el directorio de clonación temporal no existe"
+      ansible.builtin.file:
+        path: "{{ local_clone_path }}"
+        state: absent
+
+    - name: "Paso 3: Clonar el repositorio de origen en modo 'bare'"
+      ansible.builtin.git:
+        repo: "{{ source_repo_url }}"
+        dest: "{{ local_clone_path }}"
+        bare: true
+
+    - name: "Paso 4: Empujar el contenido clonado al nuevo repositorio (modo espejo)"
+      ansible.builtin.shell:
+        cmd: "git push --mirror https://{{ github_token }}@github.com/{{ github_user }}/{{ new_repo_name }}.git"
+        chdir: "{{ local_clone_path }}"
+
+    - name: "Paso 5: Limpiar el directorio de clonación temporal"
+      ansible.builtin.file:
+        path: "{{ local_clone_path }}"
+        state: absent
+
+    - name: "Paso 6: Crear Credencial SCM para el nuevo repositorio privado en AAP"
+      ansible.controller.credential:
+        name: "{{ aap_scm_credential_name }}"
+        organization: "{{ aap_organization }}"
+        credential_type: "Source Control"
+        inputs:
+          username: "{{ github_user }}"
+          password: "{{ github_token }}"
+        state: present
+        controller_host: "{{ controller_host }}"
+        controller_username: "{{ controller_username }}"
+        controller_password: "{{ controller_password }}"
+        validate_certs: false
+      register: scm_credential
+
+    - name: "Paso 7: Crear un nuevo Proyecto en AAP"
+      ansible.controller.project:
+        name: "{{ aap_project_name }}"
+        organization: "{{ aap_organization }}"
+        scm_type: "git"
+        scm_url: "https://github.com/{{ github_user }}/{{ new_repo_name }}.git"
+        credential: "{{ scm_credential.id }}"
+        wait: true # Espera a que la primera sincronización del proyecto termine.
+        state: present
+        controller_host: "{{ controller_host }}"
+        controller_username: "{{ controller_username }}"
+        controller_password: "{{ controller_password }}"
+        validate_certs: false
