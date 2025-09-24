@@ -1,0 +1,25 @@
+---
+
+- name: Run ansible-lint on playbooks
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Clone Git repository with playbooks
+      ansible.builtin.git:
+        repo: '{{ git_repo_url }}'
+        dest: /tmp/playbooks
+
+    - name: Execute ansible-lint
+      ansible.builtin.command:
+        cmd: ansible-lint -v /tmp/playbooks/
+      register: lint_result
+      ignore_errors: true
+
+    - name: Display ansible-lint results
+      ansible.builtin.debug:
+        var: lint_result.stdout_lines
+
+    - name: Fail if ansible-lint found issues
+      ansible.builtin.fail:
+        msg: "ansible-lint found issues in the playbooks."
+      when: lint_result.rc != 0
