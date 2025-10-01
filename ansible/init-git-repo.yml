@@ -93,67 +93,14 @@
         validate_certs: false
 
     - name: "Paso 8: Crear o Actualizar Webhook en GitHub"
-      block:
-        - name: "List existing webhooks for the repo"
-          ansible.builtin.uri:
-            url: "https://api.github.com/repos/{{ github_user }}/{{ new_repo_name }}/hooks"
-            method: GET
-            headers:
-              Authorization: "token {{ github_token }}"
-              Accept: "application/vnd.github.v3+json"
-            return_content: true
-            status_code: 200
-          register: hooks_list
-          delegate_to: localhost
-
-        - name: "Detect existing webhook ID (matching URL)"
-          ansible.builtin.set_fact:
-            existing_hook_id: >-
-              {{ (hooks_list.json
-                  | selectattr('config','defined')
-                  | selectattr('config.url','equalto', webhook_url | default(''))
-                  | map(attribute='id')
-                  | list).0 | default(None) }}
-
-        - name: "Create GitHub webhook (if not present)"
-          ansible.builtin.uri:
-            url: "https://api.github.com/repos/{{ github_user }}/{{ new_repo_name }}/hooks"
-            method: POST
-            headers:
-              Authorization: "token {{ github_token }}"
-              Accept: "application/vnd.github.v3+json"
-            body:
-              name: "web"
-              active: true
-              events: "{{ webhook_events | default(['push']) }}"
-              config:
-                url: "{{ webhook_url }}"
-                content_type: "json"
-                secret: "{{ webhook_key | default('') }}"
-                insecure_ssl: "{{ '1' if webhook_insecure_ssl | default(false) else '0' }}"
-            body_format: json
-            status_code: 201
-          when: existing_hook_id is none
-          delegate_to: localhost
-          register: create_hook
-
-        - name: "Update existing GitHub webhook (if present)"
-          ansible.builtin.uri:
-            url: "https://api.github.com/repos/{{ github_user }}/{{ new_repo_name }}/hooks/{{ existing_hook_id }}"
-            method: PATCH
-            headers:
-              Authorization: "token {{ github_token }}"
-              Accept: "application/vnd.github.v3+json"
-            body:
-              active: true
-              events: "{{ webhook_events | default(['push']) }}"
-              config:
-                url: "{{ webhook_url }}"
-                content_type: "json"
-                secret: "{{ webhook_key | default('') }}"
-                insecure_ssl: "{{ '1' if webhook_insecure_ssl | default(false) else '0' }}"
-            body_format: json
-            status_code: 200
-          when: existing_hook_id is not none
-          delegate_to: localhost
-          register: update_hook
+      community.general.github_webhook:
+        repository: "{{github_user }}/{{ new_repo_name }}"
+        user: "{{ github_user }}"
+        token: "{{ github_token }}"
+        url: "{{ webhook_url }}"
+        content_type: "json"
+        secret: "{{ webhook_key | default('') }}"
+        events:
+          - push
+        insecure_ssl: true
+      register: webhook_result
