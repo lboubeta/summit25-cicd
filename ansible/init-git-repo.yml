@@ -27,16 +27,16 @@
     aap_project_name: "{{ new_repo_name }}"
     aap_scm_credential_name: "Credencial Git - {{ new_repo_name }}"
 
-  vars_prompt:
-    - name: github_token
-      prompt: "Introduce tu Token de Acceso Personal de GitHub (con permisos de 'repo')"
-      private: true
-    - name: controller_username
-      prompt: "Introduce tu nombre de usuario de AAP Controller"
-      private: false
-    - name: controller_password
-      prompt: "Introduce tu contraseña o token de AAP Controller"
-      private: true
+  # vars_prompt:
+  #   - name: github_token
+  #     prompt: "Introduce tu Token de Acceso Personal de GitHub (con permisos de 'repo')"
+  #     private: true
+  #   - name: controller_username
+  #     prompt: "Introduce tu nombre de usuario de AAP Controller"
+  #     private: false
+  #   - name: controller_password
+  #     prompt: "Introduce tu contraseña o token de AAP Controller"
+  #     private: true
 
   tasks:
     - name: "Paso 1: Crear un nuevo repositorio privado en GitHub"
