@@ -46,6 +46,7 @@
         description: "{{ new_repo_description }}"
         private: false
         state: present
+        force_defaults: false
 
     - name: "Paso 2: Asegurar que el directorio de clonación temporal no existe"
       ansible.builtin.file:
