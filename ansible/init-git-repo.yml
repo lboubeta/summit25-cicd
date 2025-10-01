@@ -69,33 +69,34 @@
         state: absent
 
     - name: "Paso 6: Crear Credencial SCM para el nuevo repositorio privado en AAP"
-      ansible.controller.credential:
+      infra.aap_configuration.aap_credential:
         name: "{{ aap_scm_credential_name }}"
         organization: "{{ aap_organization }}"
-        credential_type: "Source Control"
+        credential_type: "scm"                # ajustar si tu AAP usa otro tipo string
         inputs:
           username: "{{ github_user }}"
           password: "{{ github_token }}"
-        state: present
         controller_host: "{{ controller_host }}"
         controller_username: "{{ controller_username }}"
         controller_password: "{{ controller_password }}"
-        validate_certs: false
+        validate_certs: "{{ controller_validate_certs | default(false) }}"
+        state: present
       register: scm_credential
 
     - name: "Paso 7: Crear un nuevo Proyecto en AAP"
-      ansible.controller.project:
+      infra.aap_configuration.aap_project:
         name: "{{ aap_project_name }}"
         organization: "{{ aap_organization }}"
         scm_type: "git"
         scm_url: "https://github.com/{{ github_user }}/{{ new_repo_name }}.git"
-        credential: "{{ scm_credential.id }}"
-        wait: true # Espera a que la primera sincronización del proyecto termine.
+        credential: "{{ scm_credential.id | default(scm_credential.credential.id | default('')) }}"
+        wait: true
         state: present
         controller_host: "{{ controller_host }}"
         controller_username: "{{ controller_username }}"
         controller_password: "{{ controller_password }}"
-        validate_certs: false
+        validate_certs: "{{ controller_validate_certs | default(false) }}"
+      register: aap_project
 
     - name: "Paso 8: Crear o Actualizar Webhook en GitHub"
       block:
