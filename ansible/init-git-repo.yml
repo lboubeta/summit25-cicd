@@ -78,9 +78,6 @@
           username: "{{ github_user }}"
           password: "{{ github_token }}"
         state: present
-        controller_host: "{{ controller_host }}"
-        controller_username: "{{ controller_username }}"
-        controller_password: "{{ controller_password }}"
         validate_certs: false
       register: scm_credential
 
@@ -93,9 +90,6 @@
         credential: "{{ scm_credential.id }}"
         wait: true # Espera a que la primera sincronización del proyecto termine.
         state: present
-        controller_host: "{{ controller_host }}"
-        controller_username: "{{ controller_username }}"
-        controller_password: "{{ controller_password }}"
         validate_certs: false
 
     - name: "Paso 8: Crear o Actualizar Webhook en GitHub"
