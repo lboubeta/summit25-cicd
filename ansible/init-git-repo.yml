@@ -41,10 +41,10 @@
   tasks:
     - name: "Paso 1: Crear un nuevo repositorio privado en GitHub"
       community.general.github_repo:
-        access_token: "{{ lookup('env','GITHUB_TOKEN') }}"
+        access_token: "{{ github_token }}"
         name: "{{ new_repo_name }}"
         description: "{{ new_repo_description }}"
-        private: true
+        private: false
         state: present
 
     - name: "Paso 2: Asegurar que el directorio de clonación temporal no existe"
