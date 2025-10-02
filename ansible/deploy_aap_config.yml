@@ -23,7 +23,7 @@
 
     - name: Include vars from directory
       ansible.builtin.include_vars:
-        dir: "{{ local_clone_path }}/vars"
+        dir: "{{ local_clone_path }}/ansible/vars"
         extensions: ["yml"]
       tags:
         - always
