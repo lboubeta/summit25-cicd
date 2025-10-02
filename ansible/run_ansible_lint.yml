@@ -8,12 +8,16 @@
       ansible.builtin.git:
         repo: '{{ git_repo_url }}'
         dest: /tmp/playbooks
+        force: true
+      register: git_clone
 
     - name: Execute ansible-lint
       ansible.builtin.command:
         cmd: ansible-lint -v /tmp/playbooks/
       register: lint_result
       ignore_errors: true
+      check_mode: false
+      changed_when: true
 
     - name: Display ansible-lint results
       ansible.builtin.debug:

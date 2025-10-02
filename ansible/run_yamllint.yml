@@ -1,0 +1,21 @@
+---
+
+- name: Run yamllint in codebase
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Run yamllint on the codebase
+      ansible.builtin.command:
+        cmd: yamllint .
+      register: yamllint_result
+      failed_when: yamllint_result.rc != 0 and yamllint_result.rc != 2
+      changed_when: false
+
+    - name: Display yamllint output
+      ansible.builtin.debug:
+        var: yamllint_result.stdout_lines
+
+    - name: Fail if yamllint found issues
+      ansible.builtin.fail:
+        msg: "yamllint found issues in the codebase."
+      when: yamllint_result.rc == 2

@@ -1,0 +1,16 @@
+---
+
+- name: Deploy initial AAP config (org, users, teams, etc.)
+  hosts: localhost
+  gather_facts: false
+  vars:
+    aap_validate_certs: false
+  pre_tasks:
+    - name: Include vars from directory
+      ansible.builtin.include_vars:
+        dir: ./vars
+        extensions: ["yml"]
+      tags:
+        - always
+  roles:
+    - infra.aap_configuration.dispatch

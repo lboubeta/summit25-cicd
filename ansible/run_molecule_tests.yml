@@ -5,15 +5,16 @@
   gather_facts: false
   tasks:
     - name: Execute Molecule Test
-      command: molecule test
+      ansible.builtin.command: molecule test
       args:
         chdir: "{{ item }}"
       with_items:
         - ../roles/role1
         - ../roles/role2
       register: molecule_results
-      ignore_errors: yes
+      ignore_errors: true
+      changed_when: false
 
     - name: Display Molecule Test Results
-      debug:
+      ansible.builtin.debug:
         var: molecule_results.results

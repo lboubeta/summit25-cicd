@@ -1,0 +1,16 @@
+---
+
+- name: Sign the content to be executed in AAP
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Sign content
+      ansible.builtin.command: >
+        ansible-navigator sign --private-key /path/to/private/key /path/to/content
+      register: sign_result
+      ignore_errors: true
+      changed_when: false
+
+    - name: Display Sign Result
+      ansible.builtin.debug:
+        var: sign_result.stdout_lines
