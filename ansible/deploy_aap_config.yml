@@ -19,7 +19,6 @@
         repo: "{{ source_repo_url }}"
         dest: "{{ local_clone_path }}"
         bare: true
-      when: not lookup('ansible.builtin.file', local_clone_path, get_attributes=True).exists
 
     - name: Include vars from directory
       ansible.builtin.include_vars:
