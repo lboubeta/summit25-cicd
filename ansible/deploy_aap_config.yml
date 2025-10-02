@@ -17,8 +17,16 @@
     - name: Clonar el repositorio de origen
       ansible.builtin.git:
         repo: "{{ source_repo_url }}"
-        dest: "/tmp/"
+        dest: "{{ local_clone_path }}"
         bare: true
+
+    - name: List contents of the cloned repository
+      ansible.builtin.command: ls -la "{{ local_clone_path }}"
+      register: ls_output
+
+    - name: Print the contents of the cloned repository
+      ansible.builtin.debug:
+        var: ls_output.stdout_lines
 
     - name: Include vars from directory
       ansible.builtin.include_vars:
