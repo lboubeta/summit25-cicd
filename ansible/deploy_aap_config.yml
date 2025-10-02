@@ -5,7 +5,7 @@
   gather_facts: false
   vars:
     aap_validate_certs: false
-    local_clone_path: "/tmp/{{ new_repo_name }}"
+    local_clone_path: "/tmp/{{ awx_webhook_payload.repository.name }}"
     source_repo_url: "{{ awx_webhook_payload.repository.clone_url }}"
   pre_tasks:
 
