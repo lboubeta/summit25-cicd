@@ -5,10 +5,25 @@
   gather_facts: false
   vars:
     aap_validate_certs: false
+    local_clone_path: "/tmp/{{ new_repo_name }}"
+    source_repo_url: "{{ awx_webhook_payload.repository.clone_url }}"
   pre_tasks:
+
+    - name: Ensure local_clone_path does not exist before cloning
+      ansible.builtin.file:
+        path: "{{ local_clone_path }}"
+        state: absent
+
+    - name: Clonar el repositorio de origen
+      ansible.builtin.git:
+        repo: "{{ source_repo_url }}"
+        dest: "{{ local_clone_path }}"
+        bare: true
+      when: not lookup('ansible.builtin.file', local_clone_path, get_attributes=True).exists
+
     - name: Include vars from directory
       ansible.builtin.include_vars:
-        dir: ./vars
+        dir: "{{ local_clone_path }}/vars"
         extensions: ["yml"]
       tags:
         - always

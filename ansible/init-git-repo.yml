@@ -8,15 +8,13 @@
     # ------------- CONFIGURACIÓN DEL USUARIO -------------
     # Cambia estos valores según tus necesidades.
     github_user: "lboubeta"
-    source_repo_url: "https://github.com/ansible/ansible-tower-samples.git"
+    source_repo_url: "https://github.com/lboubeta/summit25-cac-template.git"
     new_repo_name: "cac-test-repo"
     new_repo_description: "Repositorio creado y sincronizado por Ansible para AAP."
-    webhook_url: "https://summit25-aap.apps.cluster-bktlg.dynamic.redhatworkshops.io/api/controller/v2/job_templates/7/github/"
-    webhook_key: "S4rNN56OL0ZoPik76lpG7FHpXsvYVe7JW7izEh2xaziSGlmj9N"
+    webhook_url: "https://summit25-aap.apps.cluster-bktlg.dynamic.redhatworkshops.io/api/controller/v2/job_templates/16/github/"
+    webhook_key: "mfMK6Ev91QeHLS1xkn0WVQCnQOzSnk1kIglP1kRaGARjFrSMEv"
 
     # ------------- CONFIGURACIÓN DE AAP -------------
-    controller_host: "https://aap25-lboubeta-selfservice.apps.ocp.sa-iberia.lab.eng.brq2.redhat.com"
-    controller_validate_certs: false
     aap_organization: "CaC"
     aap_inventory_name: "CaC Inventory" # Asegúrate de que este inventario exista en tu AAP.
     aap_playbook_name: "hello_world.yml" # El playbook a ejecutar desde el repositorio clonado.
@@ -26,17 +24,7 @@
     local_clone_path: "/tmp/ansible_clone_{{ new_repo_name }}"
     aap_project_name: "{{ new_repo_name }}"
     aap_scm_credential_name: "Credencial Git - {{ new_repo_name }}"
-
-  # vars_prompt:
-  #   - name: github_token
-  #     prompt: "Introduce tu Token de Acceso Personal de GitHub (con permisos de 'repo')"
-  #     private: true
-  #   - name: controller_username
-  #     prompt: "Introduce tu nombre de usuario de AAP Controller"
-  #     private: false
-  #   - name: controller_password
-  #     prompt: "Introduce tu contraseña o token de AAP Controller"
-  #     private: true
+    # --------------------------------------------------------
 
   tasks:
     - name: "Paso 1: Crear un nuevo repositorio privado en GitHub"
@@ -47,6 +35,7 @@
         private: false
         state: present
         force_defaults: false
+      register: github_repo_creation
 
     - name: "Paso 2: Asegurar que el directorio de clonación temporal no existe"
       ansible.builtin.file:
@@ -58,6 +47,7 @@
         repo: "{{ source_repo_url }}"
         dest: "{{ local_clone_path }}"
         bare: true
+      when: not lookup('ansible.builtin.file', local_clone_path, get_attributes=True).exists
 
     - name: "Paso 4: Empujar el contenido clonado al nuevo repositorio (modo espejo)"
       ansible.builtin.shell:
@@ -94,7 +84,7 @@
 
     - name: "Paso 8: Crear o Actualizar Webhook en GitHub"
       community.general.github_webhook:
-        repository: "{{github_user }}/{{ new_repo_name }}"
+        repository: "{{ github_user }}/{{ new_repo_name }}"
         user: "{{ github_user }}"
         token: "{{ github_token }}"
         url: "{{ webhook_url }}"
