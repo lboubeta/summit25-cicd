@@ -18,7 +18,6 @@
       ansible.builtin.git:
         repo: "{{ source_repo_url }}"
         dest: "{{ local_clone_path }}"
-        bare: true
 
     - name: List contents of the cloned repository
       ansible.builtin.command: ls -la "{{ local_clone_path }}"
