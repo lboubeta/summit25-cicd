@@ -15,7 +15,7 @@
     webhook_key: "mfMK6Ev91QeHLS1xkn0WVQCnQOzSnk1kIglP1kRaGARjFrSMEv"
 
     # ------------- CONFIGURACIÓN DE AAP -------------
-    aap_organization: "CaC"
+    aap_organization: "Summit25"
     aap_inventory_name: "CaC Inventory" # Asegúrate de que este inventario exista en tu AAP.
     aap_playbook_name: "hello_world.yml" # El playbook a ejecutar desde el repositorio clonado.
     # ----------------------------------------------------
