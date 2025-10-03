@@ -3,17 +3,20 @@
 - name: Run ansible-lint on playbooks
   hosts: localhost
   gather_facts: false
+  vars:
+    local_clone_path: "/tmp/{{ awx_webhook_payload.repository.name }}"
+    source_repo_url: "{{ awx_webhook_payload.repository.clone_url }}"
   tasks:
     - name: Clone Git repository with playbooks
       ansible.builtin.git:
-        repo: '{{ git_repo_url }}'
-        dest: /tmp/playbooks
+        repo: "{{ source_repo_url }}"
+        dest: "{{ local_clone_path }}"
         force: true
       register: git_clone
 
     - name: Execute ansible-lint
       ansible.builtin.command:
-        cmd: ansible-lint -v /tmp/playbooks/
+        cmd: ansible-lint -v {{ local_clone_path }}/playbooks/
       register: lint_result
       ignore_errors: true
       check_mode: false
@@ -21,7 +24,7 @@
 
     - name: Display ansible-lint results
       ansible.builtin.debug:
-        var: lint_result.stdout_lines
+        var: lint_result.stdout
 
     - name: Fail if ansible-lint found issues
       ansible.builtin.fail:
