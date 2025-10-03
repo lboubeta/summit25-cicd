@@ -29,4 +29,4 @@
     - name: Fail if yamllint found issues
       ansible.builtin.fail:
         msg: "yamllint found issues in the codebase."
-      when: yamllint_result.rc == 2
+      when: yamllint_result.failed
