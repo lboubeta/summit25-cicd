@@ -33,10 +33,10 @@
 
     - name: Display ansible-lint results
       ansible.builtin.debug:
-        var: lint_result
+        var: item.stderr_lines
+      loop: "{{ lint_result.results }}"
 
     - name: Fail if ansible-lint found issues
       ansible.builtin.fail:
         msg: "ansible-lint found issues in the playbooks."
-      when: item.rc != 0
-      loop: "{{ lint_result }}"
+      when: lint_result.failed
