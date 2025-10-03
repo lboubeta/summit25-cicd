@@ -24,18 +24,19 @@
 
     - name: Execute ansible-lint
       ansible.builtin.command:
-        cmd: ansible-lint -v {{ local_clone_path }}/playbooks/{{ item }}
-      register: lint_result
+        cmd: ansible-lint {{ local_clone_path }}/playbooks/{{ item }}
       ignore_errors: true
       check_mode: false
       changed_when: true
       loop: "{{ ls_output.stdout_lines }}"
+      register: lint_result
 
     - name: Display ansible-lint results
       ansible.builtin.debug:
-        var: lint_result.stderr_lines
+        var: lint_result
 
     - name: Fail if ansible-lint found issues
       ansible.builtin.fail:
         msg: "ansible-lint found issues in the playbooks."
-      when: lint_result.rc != 0
+      when: item.rc != 0
+      loop: "{{ lint_result }}"
