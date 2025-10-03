@@ -29,8 +29,7 @@
       ignore_errors: true
       check_mode: false
       changed_when: true
-      loop:
-        - "{{ ls_output.stdout_lines }}"
+      loop: ls_output.stdout_lines
 
     - name: Display ansible-lint results
       ansible.builtin.debug:
