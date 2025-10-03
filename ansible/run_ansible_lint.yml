@@ -15,7 +15,7 @@
       register: git_clone
 
     - name: List contents of the cloned repository
-      ansible.builtin.command: ls -la "{{ local_clone_path }}/playbooks/"
+      ansible.builtin.command: ls "{{ local_clone_path }}/playbooks/"
       register: ls_output
 
     - name: Print the contents of the cloned repository
@@ -24,7 +24,7 @@
 
     - name: Execute ansible-lint
       ansible.builtin.command:
-        cmd: ansible-lint -v "{{ local_clone_path }}/playbooks/"
+        cmd: ansible-lint -v "{{ ls_output.stdout_lines }}"
       register: lint_result
       ignore_errors: true
       check_mode: false
