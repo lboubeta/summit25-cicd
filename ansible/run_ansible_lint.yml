@@ -24,7 +24,7 @@
 
     - name: Execute ansible-lint
       ansible.builtin.command:
-        cmd: ansible-lint {{ local_clone_path }}/playbooks/{{ item }}
+        cmd: ansible-lint -p {{ local_clone_path }}/playbooks/{{ item }}
       ignore_errors: true
       check_mode: false
       changed_when: true
