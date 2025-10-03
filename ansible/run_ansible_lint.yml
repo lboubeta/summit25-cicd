@@ -24,7 +24,7 @@
 
     - name: Execute ansible-lint
       ansible.builtin.command:
-        cmd: ansible-lint -v "{{ ls_output.stdout_lines }}"
+        cmd: ansible-lint -v "{{ local_clone_path }}/playbooks/test_1.yml"
       register: lint_result
       ignore_errors: true
       check_mode: false
@@ -32,7 +32,7 @@
 
     - name: Display ansible-lint results
       ansible.builtin.debug:
-        var: lint_result.stdout
+        var: lint_result.stderr_lines
 
     - name: Fail if ansible-lint found issues
       ansible.builtin.fail:
