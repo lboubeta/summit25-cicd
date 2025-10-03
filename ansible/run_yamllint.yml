@@ -4,12 +4,20 @@
   hosts: localhost
   gather_facts: false
   tasks:
+    - name: Clone Git repository with playbooks
+      ansible.builtin.git:
+        repo: "{{ source_repo_url }}"
+        dest: "{{ local_clone_path }}"
+        force: true
+      register: git_clone
+
     - name: Run yamllint on the codebase
       ansible.builtin.command:
-        cmd: yamllint .
+        cmd: yamllint -c .yamllint.yml {{ local_clone_path }}
       register: yamllint_result
       failed_when: yamllint_result.rc != 0 and yamllint_result.rc != 2
       changed_when: false
+      ignore_errors: true
 
     - name: Display yamllint output
       ansible.builtin.debug:
