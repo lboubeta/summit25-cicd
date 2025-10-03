@@ -16,7 +16,7 @@
 
     - name: Run yamllint on the codebase
       ansible.builtin.command:
-        cmd: yamllint -c {{ local_clone_path }}/.yamllint.yml {{ local_clone_path }}/playbooks/
+        cmd: yamllint -c {{ local_clone_path }}/.yamllint {{ local_clone_path }}/playbooks/
       register: yamllint_result
       failed_when: yamllint_result.rc != 0 and yamllint_result.rc != 2
       changed_when: false
