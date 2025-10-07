@@ -39,4 +39,4 @@
     - name: Fail if ansible-lint found issues
       ansible.builtin.fail:
         msg: "ansible-lint found issues in the playbooks."
-      when: lint_result.resultfailed
+      when: lint_result.results | selectattr('failed', 'equalto', true) | list | length > 0
