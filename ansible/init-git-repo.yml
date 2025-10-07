@@ -3,29 +3,6 @@
   hosts: localhost
   connection: local
   gather_facts: false
-
-  vars:
-    # ------------- CONFIGURACIÓN DEL USUARIO -------------
-    # Cambia estos valores según tus necesidades.
-    github_user: "lboubeta"
-    source_repo_url: "https://github.com/lboubeta/summit25-cac-template.git"
-    new_repo_name: "cac-test-repo"
-    new_repo_description: "Repositorio creado y sincronizado por Ansible para AAP."
-    webhook_url: "https://summit25-aap.apps.cluster-bktlg.dynamic.redhatworkshops.io/api/controller/v2/job_templates/16/github/"
-    webhook_key: "mfMK6Ev91QeHLS1xkn0WVQCnQOzSnk1kIglP1kRaGARjFrSMEv"
-
-    # ------------- CONFIGURACIÓN DE AAP -------------
-    aap_organization: "Summit25"
-    aap_inventory_name: "CaC Inventory" # Asegúrate de que este inventario exista en tu AAP.
-    aap_playbook_name: "hello_world.yml" # El playbook a ejecutar desde el repositorio clonado.
-    # ----------------------------------------------------
-
-    # --- Variables generadas (no es necesario cambiarlas) ---
-    local_clone_path: "/tmp/ansible_clone_{{ new_repo_name }}"
-    aap_project_name: "{{ new_repo_name }}"
-    aap_scm_credential_name: "Credencial Git - {{ new_repo_name }}"
-    # --------------------------------------------------------
-
   tasks:
     - name: "Paso 1: Crear un nuevo repositorio privado en GitHub"
       community.general.github_repo:
