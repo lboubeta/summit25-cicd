@@ -3,18 +3,30 @@
 - name: Run Molecule Tests
   hosts: localhost
   gather_facts: false
+  vars:
+    local_clone_path: "/tmp/{{ awx_webhook_payload.repository.name }}"
+    source_repo_url: "{{ awx_webhook_payload.repository.clone_url }}"
   tasks:
+    - name: Clone Git repository with playbooks
+      ansible.builtin.git:
+        repo: "{{ source_repo_url }}"
+        dest: "{{ local_clone_path }}"
+        force: true
+      register: git_clone
+
     - name: Execute Molecule Test
-      ansible.builtin.command: molecule test
-      args:
-        chdir: "{{ item }}"
-      with_items:
-        - ../roles/role1
-        - ../roles/role2
+      ansible.builtin.command:
+        cmd: molecule test
+        chdir: "{{ local_clone_path }}"
       register: molecule_results
       ignore_errors: true
       changed_when: false
 
-    - name: Display Molecule Test Results
+    - name: Show molecule output
       ansible.builtin.debug:
-        var: molecule_results.results
+        var: molecule_results.stdout_lines
+
+    - name: Fail if molecule failed
+      ansible.builtin.fail:
+        msg: "Molecule tests failed"
+      when: molecule_results.rc != 0
