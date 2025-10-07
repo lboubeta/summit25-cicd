@@ -13,15 +13,7 @@
         dest: "{{ local_clone_path }}"
         force: true
       register: git_clone
-
-    - name: List contents of the cloned repository
-      ansible.builtin.command: ls "{{ local_clone_path }}/playbooks/"
-      register: ls_output
-
-    - name: Print the contents of the cloned repository
-      ansible.builtin.debug:
-        var: ls_output.stdout_lines
-
+      
     - name: Execute ansible-lint
       ansible.builtin.command:
         cmd: ansible-lint -p {{ local_clone_path }}/playbooks/{{ item }}
