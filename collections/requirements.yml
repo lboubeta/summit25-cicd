@@ -1,6 +1,0 @@
----
-collections:
-  - name: community.general
-  - name: infra.aap_configuration
-  - name: ansible.controller
-    version: "4.6.19"
