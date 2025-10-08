@@ -6,6 +6,8 @@
   vars:
     local_clone_path: "/tmp/{{ awx_webhook_payload.repository.name }}"
     source_repo_url: "{{ awx_webhook_payload.repository.clone_url }}"
+  vars_files:
+    - vars/main.yml
   tasks:
     - name: Clone Git repository with playbooks
       ansible.builtin.git:
