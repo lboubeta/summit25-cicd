@@ -32,7 +32,7 @@
       ansible.controller.credential:
         name: "{{ aap_project_name }} GPG"
         organization: "{{ aap_organization }}"
-        credential_type: "GPG Private Key"
+        credential_type: "GPG Public Key"
         inputs:
           gpg_public_key: "{{ lookup('file', '/home/runner/gpg/public_key.asc') }}"
         state: present
