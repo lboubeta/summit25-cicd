@@ -41,7 +41,7 @@
       ansible.controller.credential:
         name: "{{ aap_project_name }} GPG"
         organization: "{{ aap_organization }}"
-        credential_type: "GPG Private Key"
+        credential_type: "GPG Public Key"
         state: exists
         validate_certs: false
       register: cred_exists
