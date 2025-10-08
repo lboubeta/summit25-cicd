@@ -67,6 +67,22 @@
       register: sign_result
       changed_when: false
 
+    - name: Añadir los cambios al repositorio Git
+      ansible.builtin.command:
+        cmd: >
+          git add .
+      args:
+        chdir: "{{ local_clone_path }}"
+      when: sign_result.rc == 0
+
+    - name: Commit de los cambios en el repositorio Git
+      ansible.builtin.command:
+        cmd: >
+          git commit -m "Firmado del contenido del repositorio para AAP"
+      args:
+        chdir: "{{ local_clone_path }}"
+      when: sign_result.rc == 0
+
     - name: Añadir clave pública al repositorio AAP
       ansible.controller.project:
         name: "{{ aap_project_name }}"
