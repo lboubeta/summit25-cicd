@@ -57,7 +57,7 @@
 
     - name: Mostrar el contenido del directorio clonado
       ansible.builtin.debug:
-        var: ls_result.stdout_lines
+        var: gpg_credential
 
     - name: Firmar el contenido del repositorio clonado
       ansible.builtin.command:
