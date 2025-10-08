@@ -46,6 +46,10 @@
         validate_certs: false
       register: creds
 
+    - name: Debug credenciales obtenidas
+      ansible.builtin.debug:
+        var: creds
+
     - name: Comprobar si ya existe la credencial GPG
       set_fact:
         cred_exists: "{{ creds.results | selectattr('name', 'equalto', 'GPG Key') | list | length > 0 }}"
@@ -53,7 +57,7 @@
     - name: Saltar si la credencial GPG ya existe.
       ansible.builtin.meta: end_play
       when: cred_exists
-      
+
     - name: Crear directorio GPG
       ansible.builtin.file:
         path: "{{ gpg_home }}"
