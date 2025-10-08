@@ -51,7 +51,7 @@
 
     - name: Listar el contenido del directorio clonado
       ansible.builtin.command:
-        cmd: ls -la {{ local_clone_path }}
+        cmd: ls -la {{ gpg_home }}
       register: ls_result
       changed_when: false
 
