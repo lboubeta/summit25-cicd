@@ -75,6 +75,7 @@
       args:
         chdir: "{{ local_clone_path }}"
       when: sign_result.rc == 0
+      register: output
       failed_when: >
         output.msg != "" and
         ("error" in output.msg or
