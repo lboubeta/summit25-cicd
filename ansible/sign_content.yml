@@ -26,6 +26,9 @@
   gather_facts: false
   vars_files:
     - vars/main.yml
+  vars:
+    local_clone_path: "/tmp/{{ awx_webhook_payload.repository.name }}"
+    source_repo_url: "{{ awx_webhook_payload.repository.clone_url }}"
   tasks:
 
     - name: Crear credencial GPG en AAP para firmar el contenido
@@ -39,9 +42,18 @@
         validate_certs: false
       register: gpg_credential
 
+    - name: Clone Git repository with playbooks
+      ansible.builtin.git:
+        repo: "{{ source_repo_url }}"
+        dest: "{{ local_clone_path }}"
+        force: true
+      register: git_clone
+
     - name: Firmar el contenido del repositorio clonado
       ansible.builtin.command: >
         ansible-sign project gpg-sign .
+      args:
+        chdir: "{{ local_clone_path }}"
       register: sign_result
       ignore_errors: true
       changed_when: false
