@@ -39,6 +39,10 @@
         validate_certs: false
       register: gpg_credential
 
+    - name: Mostrar información de la credencial GPG creada
+      ansible.builtin.debug:
+        var: gpg_credential
+
     - name: Añadir clave pública al repositorio AAP
       ansible.controller.project:
         name: "{{ aap_project_name }}"
