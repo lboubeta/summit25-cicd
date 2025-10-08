@@ -93,7 +93,7 @@
         scm_type: "git"
         scm_url: "https://github.com/{{ github_user }}/{{ new_repo_name }}.git"
         credential: "{{ aap_scm_credential_name }}"
-        signature_validation_credential: "{{ gpg_credential.name }}"
+        signature_validation_credential: "{{ aap_project_name }} GPG"
         wait: true # Espera a que la primera sincronización del proyecto termine.
         state: present
         validate_certs: false
