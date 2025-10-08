@@ -62,6 +62,8 @@
     - name: Firmar el contenido del repositorio clonado
       ansible.builtin.command:
         cmd: ansible-sign project gpg-sign --gnupg-home {{ gpg_home }} {{ local_clone_path }} < /dev/tty
+      environment:
+        GPG_TTY: /dev/tty
       register: sign_result
       changed_when: false
 
