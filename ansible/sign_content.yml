@@ -53,7 +53,6 @@
       ansible.builtin.command:
         cmd: ls -la {{ local_clone_path }}
       register: ls_result
-      ignore_errors: true
       changed_when: false
 
     - name: Mostrar el contenido del directorio clonado
@@ -62,9 +61,8 @@
 
     - name: Firmar el contenido del repositorio clonado
       ansible.builtin.command:
-        cmd: ansible-sign project gpg-sign {{ local_clone_path }}
+        cmd: ansible-sign project gpg-sign --gnupg-home {{ gpg_home }} {{ local_clone_path }}
       register: sign_result
-      ignore_errors: true
       changed_when: false
 
     - name: Añadir clave pública al repositorio AAP
