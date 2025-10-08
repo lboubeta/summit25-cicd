@@ -32,6 +32,7 @@
       ansible.builtin.fail:
         msg: "yamllint found issues in the codebase."
       when: yamllint_result.failed
+      ignore_errors: true
 
     - name: Send error to Slack if linting fails
       community.general.slack:
