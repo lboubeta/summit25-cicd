@@ -41,9 +41,10 @@
       ansible.controller.credential:
         name: "{{ aap_project_name }} GPG"
         organization: "{{ aap_organization }}"
-        validate_certs: false
+        credential_type: "GPG Private Key"
         state: exists
-      register: creds
+        validate_certs: false
+      register: cred_exists
 
     - name: Comprobar si ya existe la credencial GPG
       set_fact:
