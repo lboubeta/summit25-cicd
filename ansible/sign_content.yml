@@ -50,10 +50,8 @@
       register: git_clone
 
     - name: Firmar el contenido del repositorio clonado
-      ansible.builtin.command: >
-        ansible-sign project gpg-sign .
-      args:
-        chdir: "{{ local_clone_path }}"
+      ansible.builtin.command:
+        cmd: ansible-sign project gpg-sign {{ local_clone_path }}
       register: sign_result
       ignore_errors: true
       changed_when: false
