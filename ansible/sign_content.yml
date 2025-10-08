@@ -37,14 +37,10 @@
     gpg_batch_file: "/tmp/gpg_batch.cfg"
 
   tasks:
-    - name: Obtener lista de credenciales
-      ansible.controller.credential:
-        name: "{{ aap_project_name }} GPG"
-        organization: "{{ aap_organization }}"
-        credential_type: "GPG Public Key"
-        state: exists
-        validate_certs: false
-      register: creds
+    - name: Comprobar si la credencial GPG ya existe en AAP
+      ansible.builtin.uri:
+        url: "{{ aap_url }}/api/v2/credentials/?name={{ aap_project_name }}+GPG+Key"
+        method: GET
 
     - name: Debug credenciales obtenidas
       ansible.builtin.debug:
