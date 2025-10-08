@@ -72,3 +72,18 @@
           - push
         insecure_ssl: true
       register: webhook_result
+
+    - name: "Enviar detalles del repositorio por Slack"
+      community.general.slack:
+        token: "{{ slack_token }}"
+        msg: |
+          :tada: Se ha creado un nuevo repositorio en GitHub y AAP! :tada:
+
+          *Repositorio:* {{ github_repo_creation.repo.html_url }}
+          *Proyecto AAP:* {{ aap_project_name }}
+          *Credencial SCM AAP:* {{ aap_scm_credential_name }}
+          *Webhook URL:* {{ webhook_result.webhook.url }}
+        channel: "{{ slack_channel }}"
+        username: "GitHub-AAP-Bot"
+        icon_emoji: ":robot_face:"
+      when: slack_token is defined and slack_channel is defined
