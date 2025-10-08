@@ -50,7 +50,7 @@
         msg: |
           :warning: ansible-lint found issues in the playbooks of repository {{ awx_webhook_payload.repository.name }}. :warning:
           Please review the linting results and address the issues.
-          "{{ lint_result.results | selectattr('stderr_lines') | map(attribute='stderr_lines') | list }}"
+          "{{ lint_result.results }}"
         channel: "{{ slack_channel }}"
         username: "AnsibleLintBot"
         icon_emoji: ":warning:"
