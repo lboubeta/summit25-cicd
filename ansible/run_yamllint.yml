@@ -44,4 +44,4 @@
         username: "AnsibleLintBot"
         icon_emoji: ":warning:"
       when: yamllint_result.failed
-      failed_when: false
+      failed_when: true
