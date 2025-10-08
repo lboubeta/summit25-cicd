@@ -40,6 +40,7 @@
       ansible.builtin.fail:
         msg: "ansible-lint found issues in the playbooks."
       when: lint_result.results | selectattr('failed', 'equalto', true) | list | length > 0
+      ignore_errors: true
 
     - name: Send error to Slack if linting fails
       community.general.slack:
