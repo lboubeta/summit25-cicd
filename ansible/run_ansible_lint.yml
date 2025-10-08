@@ -26,7 +26,7 @@
 
     - name: Execute ansible-lint
       ansible.builtin.command:
-        cmd: ansible-lint -q {{ local_clone_path }}/playbooks/{{ item }} | grep -v -e "WARNING"
+        cmd: ansible-lint -q {{ local_clone_path }}/playbooks/{{ item }}
       ignore_errors: true
       check_mode: false
       changed_when: true
@@ -50,7 +50,7 @@
         msg: |
           :warning: ansible-lint found issues in the playbooks of repository {{ awx_webhook_payload.repository.name }}. :warning:
           Please review the linting results and address the issues.
-          "{{ lint_result.stderr_lines }}"
+          "{{ lint_result.stderr }}"
         channel: "{{ slack_channel }}"
         username: "AnsibleLintBot"
         icon_emoji: ":warning:"
