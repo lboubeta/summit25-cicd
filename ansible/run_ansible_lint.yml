@@ -24,7 +24,7 @@
 
     - name: Execute ansible-lint
       ansible.builtin.command:
-        cmd: ansible-lint -p {{ local_clone_path }}/playbooks/{{ item }}
+        cmd: ansible-lint -q {{ local_clone_path }}/playbooks/{{ item }} | grep -v -e "WARNING"
       ignore_errors: true
       check_mode: false
       changed_when: true
@@ -40,3 +40,16 @@
       ansible.builtin.fail:
         msg: "ansible-lint found issues in the playbooks."
       when: lint_result.results | selectattr('failed', 'equalto', true) | list | length > 0
+
+    - name: Send error to Slack if linting fails
+      community.general.slack:
+        token: "{{ slack_token }}"
+        msg: |
+          :warning: ansible-lint found issues in the playbooks of repository {{ awx_webhook_payload.repository.name }}. :warning:
+          Please review the linting results and address the issues.
+          "{{ lint_result.item.stderr_lines }}"
+        channel: "{{ slack_channel }}"
+        username: "AnsibleLintBot"
+        icon_emoji: ":warning:"
+      when: lint_result.results | selectattr('failed', 'equalto', true) | list | length > 0
+      ignore_errors: true
