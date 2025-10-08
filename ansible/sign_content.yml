@@ -59,6 +59,15 @@
       ansible.builtin.debug:
         var: gpg_credential
 
+    - name: Check if signature already exists in the cloned repository
+      ansible.builtin.stat:
+        path: "{{ local_clone_path }}/.ansible-sign/sha256sum.txt.sig"
+      register: sig_exists
+
+    - name: Terminar el playbook si la firma ya existe
+      ansible.builtin.meta: end_play
+      when: sig_exists.stat.exists
+
     - name: Firmar el contenido del repositorio clonado
       ansible.builtin.command:
         cmd: ansible-sign project gpg-sign --gnupg-home {{ gpg_home }} {{ local_clone_path }}
@@ -76,15 +85,6 @@
         chdir: "{{ local_clone_path }}"
       when: sign_result.rc == 0
       register: output
-      failed_when: >
-        output.msg != "" and
-        ("error" in output.msg or
-        "conflict" in output.msg or
-        "Errno" in output.msg or
-        "fatal" in output.msg or
-        (output.stdout != "" and
-        "nothing to commit, working tree clean" not in output.stdout) or
-        (output.stderr != ""))
 
     - name: Añadir clave pública al repositorio AAP
       ansible.controller.project:
@@ -97,4 +97,3 @@
         wait: true # Espera a que la primera sincronización del proyecto termine.
         state: present
         validate_certs: false
-
