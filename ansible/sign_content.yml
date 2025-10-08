@@ -26,80 +26,9 @@
   gather_facts: false
   vars_files:
     - vars/main.yml
-  vars:
-    gpg_name: "Luis Boubeta"
-    gpg_email: "lboubeta@redhat.com"
-    gpg_comment: "Clave de CI/CD"
-    gpg_key_type: "RSA"
-    gpg_key_length: 4096
-    gpg_expire_date: "2y"
-    gpg_home: "/tmp/gpg"
-    gpg_batch_file: "/tmp/gpg_batch.cfg"
-
   tasks:
-    - name: Comprobar si la credencial GPG ya existe en AAP
-      ansible.builtin.uri:
-        url: "{{ aap_url }}/api/v2/credentials/?name={{ aap_project_name }}+GPG+Key"
-        method: GET
 
-    - name: Debug credenciales obtenidas
-      ansible.builtin.debug:
-        var: creds
-
-    - name: Comprobar si ya existe la credencial GPG
-      set_fact:
-        cred_exists: "{{ creds.results | selectattr('name', 'equalto', 'GPG Key') | list | length > 0 }}"
-
-    - name: Saltar si la credencial GPG ya existe.
-      ansible.builtin.meta: end_play
-      when: cred_exists
-
-    - name: Crear directorio GPG
-      ansible.builtin.file:
-        path: "{{ gpg_home }}"
-        state: directory
-        mode: "0700"
-
-    - name: Crear archivo de configuración batch
-      ansible.builtin.copy:
-        dest: "{{ gpg_batch_file }}"
-        mode: "0600"
-        content: |
-          %echo Generando clave GPG
-          Key-Type: {{ gpg_key_type }}
-          Key-Length: {{ gpg_key_length }}
-          Subkey-Type: {{ gpg_key_type }}
-          Subkey-Length: {{ gpg_key_length }}
-          Name-Real: {{ gpg_name }}
-          Name-Comment: {{ gpg_comment }}
-          Name-Email: {{ gpg_email }}
-          Expire-Date: {{ gpg_expire_date }}
-          %no-protection
-          %commit
-          %echo Clave creada correctamente
-
-    - name: Generar clave GPG
-      ansible.builtin.command:
-        cmd: "gpg --batch --gen-key {{ gpg_batch_file }}"
-        creates: "{{ gpg_home }}/pubring.kbx"
-      environment:
-        GNUPGHOME: "{{ gpg_home }}"
-
-    - name: Obtener fingerprint principal
-      ansible.builtin.shell: |
-        gpg --homedir {{ gpg_home }} --list-keys --with-colons | \
-        awk -F: '$1=="pub" {getline; if ($1=="fpr") print $10}'
-      register: gpg_fingerprint
-      changed_when: false
-
-    - name: Exportar la clave pública
-      ansible.builtin.command:
-        cmd: "gpg --armor --export {{ gpg_fingerprint.stdout }} > /tmp/gpg/public_key.asc"
-      environment:
-        GNUPGHOME: "{{ gpg_home }}"
-      register: public_key
-
-    - name: Crear credencial GPG en AAP para firmar el contendido
+    - name: Crear credencial GPG en AAP para firmar el contenido
       ansible.controller.credential:
         name: "{{ aap_project_name }} GPG"
         organization: "{{ aap_organization }}"
