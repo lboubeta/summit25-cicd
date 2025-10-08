@@ -8,6 +8,10 @@
     local_clone_path: "/tmp/{{ awx_webhook_payload.repository.name }}"
     source_repo_url: "{{ awx_webhook_payload.repository.clone_url }}"
   pre_tasks:
+    - name: Launch a Project with extra_vars without waiting
+      ansible.controller.project_update:
+        project: "{{ awx_webhook_payload.repository.name }}"
+        wait: true
 
     - name: Ensure local_clone_path does not exist before cloning
       ansible.builtin.file:

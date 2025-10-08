@@ -39,9 +39,12 @@
         validate_certs: false
       register: gpg_credential
 
-    - name: Mostrar información de la credencial GPG creada
-      ansible.builtin.debug:
-        var: gpg_credential
+    - name: Firmar el contenido del repositorio clonado
+      ansible.builtin.command: >
+        ansible-sign project gpg-sign .
+      register: sign_result
+      ignore_errors: true
+      changed_when: false
 
     - name: Añadir clave pública al repositorio AAP
       ansible.controller.project:
@@ -54,3 +57,4 @@
         wait: true # Espera a que la primera sincronización del proyecto termine.
         state: present
         validate_certs: false
+
