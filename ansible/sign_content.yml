@@ -39,11 +39,10 @@
   tasks:
     - name: Obtener lista de credenciales
       ansible.controller.credential:
-        controller_host: "{{ controller_host }}"
-        controller_username: "{{ controller_username }}"
-        controller_password: "{{ controller_password }}"
+        name: "{{ aap_project_name }} GPG"
+        organization: "{{ aap_organization }}"
         validate_certs: false
-        query: true
+        state: exists
       register: creds
 
     - name: Comprobar si ya existe la credencial GPG
@@ -98,7 +97,7 @@
     - name: Crear credencial GPG en AAP para firmar el contendido
       ansible.controller.credential:
         name: "{{ aap_project_name }} GPG"
-        organization: "CaC"
+        organization: "{{ aap_organization }}"
         credential_type: "GPG Private Key"
         inputs:
           private_key_data: "{{ lookup('file', '/tmp/gpg/private_key.asc') }}"
