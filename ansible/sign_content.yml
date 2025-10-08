@@ -49,6 +49,17 @@
         force: true
       register: git_clone
 
+    - name: Listar el contenido del directorio clonado
+      ansible.builtin.command:
+        cmd: ls -la {{ local_clone_path }}
+      register: ls_result
+      ignore_errors: true
+      changed_when: false
+
+    - name: Mostrar el contenido del directorio clonado
+      ansible.builtin.debug:
+        var: ls_result.stdout_lines
+
     - name: Firmar el contenido del repositorio clonado
       ansible.builtin.command:
         cmd: ansible-sign project gpg-sign {{ local_clone_path }}
