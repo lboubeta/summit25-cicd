@@ -55,4 +55,4 @@
         username: "AnsibleLintBot"
         icon_emoji: ":warning:"
       when: lint_result.results | selectattr('failed', 'equalto', true) | list | length > 0
-      ignore_errors: true
+      failed_when: true
