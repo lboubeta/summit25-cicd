@@ -76,13 +76,13 @@
       when: sign_result.rc == 0
 
     - name: Commit de los cambios en el repositorio Git
-      community.general.git:
-        repo: "{{ local_clone_path }}"
+      ansible.builtin.git:
+        repo: "{{ source_repo_url }}"
+        dest: "{{ local_clone_path }}"
         commit: true
         msg: "Firmado del contenido con GPG"
         author_name: "CI/CD"
         author_email: "lboubeta@redhat.com"
-      when: sign_result.rc == 0
 
     - name: Añadir clave pública al repositorio AAP
       ansible.controller.project:
