@@ -34,7 +34,7 @@
         organization: "{{ aap_organization }}"
         credential_type: "GPG Private Key"
         inputs:
-          private_key_data: "{{ lookup('file', '/tmp/gpg/private_key.asc') }}"
+          private_key_data: "{{ lookup('file', '/home/runner/gpg/private_key.asc') }}"
         state: present
         validate_certs: false
       register: gpg_credential
