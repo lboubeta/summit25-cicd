@@ -45,7 +45,7 @@
         organization: "{{ aap_organization }}"
         scm_type: "git"
         scm_url: "https://github.com/{{ github_user }}/{{ new_repo_name }}.git"
-        credential: "{{ scm_credential.id }}"
+        credential: "{{ aap_scm_credential_name }}"
         signature_validation_credential: "{{ gpg_credential.id }}"
         wait: true # Espera a que la primera sincronización del proyecto termine.
         state: present
