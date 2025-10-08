@@ -13,6 +13,10 @@
         project: "{{ awx_webhook_payload.repository.name }}"
         wait: true
 
+    - name: Wait for 10 seconds to ensure project is ready
+      ansible.builtin.pause:
+        seconds: 10
+
     - name: Ensure local_clone_path does not exist before cloning
       ansible.builtin.file:
         path: "{{ local_clone_path }}"
