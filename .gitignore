@@ -1,2 +1,5 @@
 .ansible
 *.log
+.gitignore
+.github
+.vscode

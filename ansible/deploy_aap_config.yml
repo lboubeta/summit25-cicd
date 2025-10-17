@@ -22,18 +22,10 @@
         path: "{{ local_clone_path }}"
         state: absent
 
-    - name: Clonar el repositorio de origen
+    - name: Clone the source repository
       ansible.builtin.git:
         repo: "{{ source_repo_url }}"
         dest: "{{ local_clone_path }}"
-
-    - name: List contents of the cloned repository
-      ansible.builtin.command: ls -la "{{ local_clone_path }}"
-      register: ls_output
-
-    - name: Print the contents of the cloned repository
-      ansible.builtin.debug:
-        var: ls_output.stdout_lines
 
     - name: Include vars from directory
       ansible.builtin.include_vars:
