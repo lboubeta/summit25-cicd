@@ -1,71 +1,115 @@
-To get started, simply click the button below...
+# Ansible Automation Platform configuration with CI/CD
 
-[![Contribute](https://www.eclipse.org/che/contribute.svg)](https://workspaces.openshift.com/f?url=https://github.com/redhat-developer-demos/ansible-devspaces-demo)
+This repository contains playbooks and automation to:
+- Create a GitHub repository from a template and integrate it with Ansible Automation Platform (AAP).
+- Create AAP SCM credentials and projects.
+- Create or update GitHub webhooks to trigger Event Driven Ansible flows.
+- Run CI checks (ansible-lint, yamllint, molecule) and sign content.
 
-# Ansible Development on OpenShift Dev Spaces
+## Contents (important paths)
+- ansible/init-git-repo.yml        — create GitHub repo, mirror content, create AAP resources, create webhook
+- ansible/deploy_aap_config.yml    — deploy CaC exports to the controller
+- ansible/run_ansible_lint.yml     — run ansible-lint
+- ansible/run_molecule_tests.yml   — run molecule tests
+- ansible/vars/main.yml            — main variables to edit for your environment
+- collections/requirements.yml     — required Ansible collections
+- .ansible/collections/requirements.txt — python libs used by collections (when present)
 
-This repository provides a development environment for Ansible playbook creation, testing with Molecule, and ansible-lint checks using OpenShift Dev Spaces.
+## Prerequisites
+- Ansible 2.14+ (or supported version for infra.aap_configuration collection)
+- ansible-galaxy collections installed:
+  ansible-galaxy collection install -r collections/requirements.yml
+- Python requirements for collections:
+  pip install -r .ansible/collections/requirements.txt
+- GitHub token with repo and admin:repo_hook scopes (do not commit token)
+- Access to an AAP controller with an API user (or token)
+- (Optional) Slack token if notifications are desired
 
-## Summary
+## Variables to configure
+Edit `ansible/vars/main.yml` or provide values via an encrypted vault file / extra-vars.
 
-This repository contains a `devfile.yaml` file, which defines the development environment for Ansible. The DevSpace created using this `devfile` provides the necessary tools and dependencies for Ansible playbook development, testing with Molecule, and linting with ansible-lint. This is designed to be used in environments where developers do not have easy access to linux systems from which to develop ansible automation content, but do have OpenShift.
+Required variables (examples shown):
+- github_user: "my-github-user-or-org"
+- source_repo_url: "https://github.com/my-org/template-repo.git"
+- new_repo_name: "new-repo-name"
+- new_repo_description: "Repository created by Ansible for AAP"
+- webhook_url: "https://gateway.example.com/webhooks/user"         # where GitHub will send event payloads
+- webhook_key: "super-secret-webhook-signing-key"                  # store in vault
 
-The `devfile.yaml` includes configurations for:
+AAP connection and resources (pass via extra-vars or vault):
+- controller_host: "aap.example.com"
+- controller_username: "automation_admin" or use controller_token
+- controller_password: "REDACTED"
+- controller_validate_certs: false
+- aap_organization: "CustomerOrg"
+- aap_inventory_name: "Production"      # inventory to use in AAP
+- aap_playbook_name: "onboard_user.yml" # optional
 
-- Ansible
-- Molecule (testing framework for Ansible roles)
-- Ansible Lint (tool for checking best practices and potential issues in Ansible code)
+Optional:
+- github_token: "GITHUB_PERSONAL_ACCESS_TOKEN"  # required to create repos/webhooks
+- slack_token, slack_channel                        # for Slack notifications
 
-You can use the provided DevSpace to start working on your Ansible projects immediately, without worrying about setting up the development environment manually.
+Recommended: place secrets in an ansible-vault file (vault.yml) and pass with `-e @vault.yml`.
 
-## Setting up OpenShift DevSpaces
-
-To get started with OpenShift Dev Spaces, refer to the [OpenShift Dev Spaces documentation](https://access.redhat.com/documentation/en-us/red_hat_openshift_dev_spaces/3.5/html/administration_guide/index) for detailed instructions on setting up your development environment and creating your DevSpaces.
-
-## Base Image Of Devfile
-
-[Ansible Workspace Environment Reference Image](https://github.com/ansible/ansible-dev-tools/tree/main/devspaces) is used as an image for Ansible development and it's defined in the `devfile.yaml`.
-
-### GitHub OAuth2
-
-The instructions for configuring OAuth2 for GitHub can be found at the following link:
-
-https://access.redhat.com/documentation/en-us/red_hat_openshift_dev_spaces/3.5/html/administration_guide/configuring-devspaces#configuring-oauth-2-for-github
-
-Once the secret is in place, restart the main Dev Space container. Any workspace created before this step is complete will NOT have access to GitHub OAuth, and will need to be deleted and recreated to get access.
-
-NOTE: You will still need to configured your name/email globally the first time your workspace is accessed (or once for each new workspace, if you choose not to configure globally).
-
+Example minimal vault.yml (do not commit):
+```yaml
+github_token: "ghp_xxx"
+webhook_key: "super-secret"
+controller_password: "AAP_password"
+slack_token: "xoxb-xxx"
 ```
-git config --global user.name "Homer Simpson"
-git config --global user.email homer@springfieldpower.com
+
+## How to run
+1. Validate or install collections and python deps:
+```bash
+ansible-galaxy collection install -r collections/requirements.yml
+pip install -r .ansible/collections/requirements.txt
 ```
 
-## Sample Molecule Testing Role
+2. Dry-run (syntax/check):
+```bash
+ansible-playbook ansible/init-git-repo.yml --check -e @ansible/vars/main.yml -e @vault.yml
+```
 
-A sample role has been provided in the collections/ansible_collections/sample_namespace/sample_collection/roles/backup_file directory to experiment with Test Driven Development using Molecule and OpenShift DevSpaces. A molecule verifier has been configured to test that the role functions as expected.
+3. Execute creation (real run):
+```bash
+ansible-playbook ansible/init-git-repo.yml -e @ansible/vars/main.yml -e @vault.yml
+```
 
-### Automation requirements
-1. Make a backup of a file identified using the backup_file_source variable
-2. The backup should be stored in the directory identified by the backup_file_dest_folder variable
-3. If the backup directory doesn't exist, it should be created and writable
-4. The backup file should have a suffix appended such as '.bak' which is identified by the backup_file_dest_suffix variable
+Pass controller connection variables either in vault.yml or as extra-vars:
+```bash
+-e controller_host="aap.example.com" -e controller_username="admin"
+```
 
-### To begin development against the backup_file role
-1. Click the three horizontal bar icon in the top left of the window and select 'Terminal' -> 'New Terminal'
-2. Click into the terminal window
-3. Change directory into backup file role `cd collections/ansible_collections/sample_namespace/sample_collection/extensions/`
-4. Run `molecule create`. This will start a test pod for the automation to run against (defined in roles/backup_file/molecule/default/molecule.yml).
-5. Run `molecule list` and `oc get pods` to view the test instance that was created
-6. Run `molecule verify` to run the verification against the test pod and see the failures to help guide the tasks necessary in the role.
-7. Run `molecule converge` to apply the role to the pod. This will create a backup of a file in the backup destination folder with a suffix appended.
-8. Run `molecule converge` to execute the role against the test instance, and `molecule verify` to see if any tests are still failing. Repeat this until all tests pass.
+## GitHub webhook notes
+- webhook_url must be reachable by GitHub (public or via tunnel).
+- webhook_key is used to validate signatures on incoming requests.
+- GitHub token must have permissions to create webhooks for the target repository.
 
-To reset your test pod back to a fresh instance you can run `molecule destroy` and then `molecule create` to recreate it. To run the full molecule test without stepping through each stage, run `molecule test`.
+## AAP / infra.aap_configuration notes
+- This repo uses the supported infra.aap_configuration collection to create AAP resources as code.
+- Prefer token-based controller auth where possible.
+- If TLS validation fails during development, set `controller_validate_certs: false`.
 
-## Contributing
+## CI / Tests
+- To run linting and tests, see the playbooks in `ansible/`:
+  - ansible/run_ansible_lint.yml
+  - ansible/run_yamllint.yml
+  - ansible/run_molecule_tests.yml
+- Example run for molecule (depends on scenario):
+```bash
+molecule test -s default
+```
 
-Contributions to this repository are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue with [Red Hat](https://issues.redhat.com/projects/CRW/issues).
+## Troubleshooting
+- Increase verbosity: add `-v` or `-vvv` to ansible-playbook.
+- Check controller API connectivity and user permissions.
+- Verify GitHub token scopes and rate limits.
 
-## Code of Conduct
-We ask all of our community members and contributors to adhere to the [Ansible code of conduct](http://docs.ansible.com/ansible/latest/community/code_of_conduct.html). If you have questions or need assistance, please reach out to our community team at [codeofconduct@ansible.com](mailto:codeofconduct@ansible.com)
+## Support
+For changes to variables or to generate a vault template with specific placeholders, run:
+```bash
+ansible-playbook ansible/init-git-repo.yml --tags prepare-vault -e @ansible/vars/main.yml
+```
+(Adjust or create a playbook task that creates a sample vault if you need it.)
+
